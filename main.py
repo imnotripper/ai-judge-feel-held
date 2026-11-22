@@ -7,8 +7,6 @@ be overridden with the OUTPUT_DIR environment variable for local testing.
 """
 
 import os
-import sys
-import tempfile
 
 TEXT = (
     "The afternoon light has gone amber on the floorboards, and the dust "
@@ -21,22 +19,9 @@ TEXT = (
 
 def main() -> None:
     out_dir = os.environ.get("OUTPUT_DIR") or "/output"
-    try:
-        os.makedirs(out_dir, exist_ok=True)
-        fd, tmp_path = tempfile.mkstemp(dir=out_dir, prefix=".entry-", suffix=".tmp")
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8") as f:
-                f.write(TEXT)
-            os.replace(tmp_path, os.path.join(out_dir, "entry.txt"))
-        except BaseException:
-            try:
-                os.unlink(tmp_path)
-            except OSError:
-                pass
-            raise
-    except OSError as exc:
-        print(f"error: cannot write entry.txt in {out_dir}: {exc}", file=sys.stderr)
-        raise SystemExit(1)
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "entry.txt"), "w", encoding="utf-8") as f:
+        f.write(TEXT)
 
 
 if __name__ == "__main__":
